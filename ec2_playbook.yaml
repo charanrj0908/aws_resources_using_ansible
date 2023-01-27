@@ -1,0 +1,53 @@
+-
+ hosts: localhost
+ connection: local
+ gather_facts: false
+ 
+ tasks:
+
+
+ 
+
+   - name: create security group
+     ec2_group:
+
+        name: ansible
+        description: ansible security group
+        region: us-east-1
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+
+   - name: provision a set of instances
+     ec2:
+        key_name: Ansible
+        group: ansible
+        instance_type: t2.micro
+        image: ami-08e637cea2f053dfa
+        region: us-east-1
+        wait: true
+        exact_count: 20
+        count_tag:
+          Name: AnsibleNginxWebServers
+        instance_tags:
+          Name: Ansible
+     register: ec2
+     
+   - name: add all instance public ips to host group
+     add_host:
+        hostname: "{{ item.public_ip }}"
+        groups: ansiblehosts
+     with_items: "{{ ec2.instances }}"
+
+   - name: show group
+     debug:
+        var: groups.ansiblehosts
+
+   

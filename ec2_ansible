@@ -1,0 +1,14 @@
+-
+ hosts: localhost
+ connection: local
+ gather_facts: false
+ 
+ tasks:
+  - name: ec2 instance creation
+    amazon.aws.ec2:
+       region: us-east-1
+       key_name: Ansible
+       instance_type: t2.micro
+       image: ami-0aa7d40eeae50c9a9
+       wait : yes
+       
